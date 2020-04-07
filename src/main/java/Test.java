@@ -37,8 +37,6 @@ public class Test {
      * -使用递归函数的返回值进行计算并返回最终结果 -> 递归返回跳法数count
      **/
     public int numWays1(int n) {
-//        if(1 == n) return 1;
-//        if(2 == n) return 2;
         if (n <=2) return n;
         int count = numWays1(n - 1) + numWays1(n - 2);
         return count;
@@ -63,7 +61,55 @@ public class Test {
         return count;
     }
 
-    //优化
-    //思路
+
+
+    /**
+     * 由上到下的范式套入实现:
+     *
+     * -寻找递推关系:
+     *  f(n) = f(n-1) + f(n-2) 相当于从n-1的计算过程,先从n找到1,然后在从1累加到n的过程
+     *  修改为从1-n的过程, f(i+1) = f(i) + f(i-1) ,i+1==n时计算结束,
+     *  累加的过程变量需要我们提取为中间变量参数
+     *
+     * -创建新函数,将[由下到上-范式]中的最终计算结果依赖的中间变量提取为函数的参数
+     *  将f(i),f(n-1)的变量保存,初始调用我们使用f(2) = f(1) + f(0) = 1+1作为初始状态
+     *
+     * -寻找基本情况:跳出时返回基本情况的结果与中间变量的计算结果 ->
+     *  if (i >= n) return a + b;
+     *
+     * -根据函数参数与中间变量重新计算出新的中间变量
+     *  f(i) = f(i-1) + f(i-2) = a + b
+     *  f(i+1) = f(i) + f(i-1) = (a+b) + b
+     *
+     *  - 修改参数 -> i + 1 递进一步
+     *  - 递归调用并返回（该处的返回由基本情况条件触发）
+     **/
+    public int numWayTail(int n) {
+        if(n<2) return n;
+        return numWayTailHelper(n, 2, 1, 1);
+    }
+
+    private int numWayTailHelper(int n, int i, int a, int b) {
+        if (i>=n) return a+b;
+        return numWayTailHelper(n, i + 1, a + b, a);
+    }
+
+    public int numWayFor(int n) {
+        if (n < 2) return n;
+
+        int i = 2; int a = 1; int b = 1; // 与尾递归 numWaysTailHelp 一致
+        int count = a + b; // 保存次数，将尾递归的返回值提取为变量
+
+        while (i <= n) { // 1-n 的过程
+            // 因为 f(i) = f(i-1) + f(i-2) = a + b
+            // 下次迭代时 f(i+1) = f(i) + f(i-1) = (a+b) + b
+            count = a + b;
+            b = a;
+            a = count;
+            i++;
+        }
+        return count;
+    }
+
 
 }
